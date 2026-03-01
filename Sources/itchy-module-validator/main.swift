@@ -8,6 +8,7 @@ enum ValidationError: LocalizedError {
     case missingPrincipalClass
     case missingMetadata
     case missingFactory
+    case factoryReturnedInvalidType
     case invalidIdentifier
     case invalidDisplayName
     case invalidPreferredWidth
@@ -26,6 +27,8 @@ enum ValidationError: LocalizedError {
             "Principal class does not expose metadata."
         case .missingFactory:
             "Principal class does not expose makeViewController()."
+        case .factoryReturnedInvalidType:
+            "makeViewController() did not return an NSViewController."
         case .invalidIdentifier:
             "metadata.identifier is missing or invalid."
         case .invalidDisplayName:
@@ -101,6 +104,10 @@ struct ItchyModuleValidatorCLI {
 
         guard instance.responds(to: factorySelector) else {
             throw ValidationError.missingFactory
+        }
+
+        guard instance.perform(factorySelector)?.takeUnretainedValue() is NSViewController else {
+            throw ValidationError.factoryReturnedInvalidType
         }
 
         let identifier = (metadata.value(forKey: "identifier") as? String ?? "")

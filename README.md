@@ -6,7 +6,15 @@ Repository:
 
 - `https://github.com/selcuksarikoz/itchy-sdk`
 
-## Import
+## Install
+
+Add the package from Xcode:
+
+```text
+https://github.com/selcuksarikoz/itchy-sdk
+```
+
+Then import:
 
 ```swift
 import itchy
@@ -27,6 +35,12 @@ Build your bundle, then import the compiled `.bundle` from:
 
 - `Itchy > Settings > Modules > Custom Modules > Import Module`
 
+Or copy it manually to:
+
+- `~/Library/Application Support/Itchy/Modules`
+
+After copying manually, reopen Itchy or reopen Settings so the module list refreshes.
+
 ## Validate a module bundle
 
 The SDK ships with a validator CLI:
@@ -41,8 +55,20 @@ This checks:
 - principal class exists
 - `metadata` exists
 - `makeViewController()` exists
+- `makeViewController()` returns an `NSViewController`
 - identifier and display name are valid
 - preferred width is sane
+
+## Templates
+
+Starter module templates live in `Templates/`:
+
+- `ClockModule`
+- `CounterModule`
+- `DateModule`
+- `QuickActionsModule`
+
+Each template is a standalone example bundle entry point plus SwiftUI view.
 
 ## Local development
 
