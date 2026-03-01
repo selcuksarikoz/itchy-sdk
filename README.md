@@ -1,10 +1,23 @@
 # ItchySDK
 
-`ItchySDK` is the public plugin SDK for building custom Itchy Nook modules.
+`ItchySDK` is the public plugin SDK for building custom Itchy extensions.
 
 Repository:
 
 - `https://github.com/selcuksarikoz/itchy-sdk`
+
+## What you can build
+
+`ItchySDK` currently supports two plugin placements:
+
+- `placement: .nookModule`
+  Builds a Nook module that appears inside the horizontal Nook area.
+- `placement: .menuApp`
+  Builds a full-width Nook app that appears inside the expanded app area with its own tab button in the header.
+
+If you say "Nook app" in docs or product copy, that maps to `placement: .menuApp` in code today.
+
+Both plugin types are delivered as compiled macOS `.bundle` files.
 
 ## Install
 
@@ -20,28 +33,93 @@ Then import:
 import itchy
 ```
 
-## What you build
+## Minimal plugin contract
 
 Create a macOS `.bundle` target whose principal class conforms to `ItchyModulePlugin`.
-
-`Templates/DateModule/` like folders are source examples only. They are not importable plugins.
-
-The thing Itchy loads is the compiled output:
-
-- `DateModule.bundle`
-- `CounterModule.bundle`
-
-You must explicitly choose one placement in code:
-
-- `placement: .nookModule`
-- `placement: .menuApp`
-
-Itchy renders the Nook title from `metadata.displayName`. Your plugin view should usually render only the content area and keep its background transparent.
 
 Your principal class must expose:
 
 - `metadata`
 - `makeViewController()`
+
+The public SDK surface is:
+
+```swift
+public enum ItchyPluginPlacement: String {
+    case nookModule = "nook"
+    case menuApp = "menu"
+}
+
+public final class ItchyModuleMetadata: NSObject {
+    public init(
+        identifier: String,
+        displayName: String,
+        summary: String = "",
+        preferredWidth: NSNumber = 240,
+        placement: ItchyPluginPlacement,
+        iconSystemName: String = "square.grid.2x2"
+    )
+}
+
+public protocol ItchyModulePlugin: AnyObject {
+    var metadata: ItchyModuleMetadata { get }
+    func makeViewController() -> NSViewController
+}
+```
+
+## Placement guide
+
+Choose `placement: .nookModule` when:
+
+- your UI is compact
+- your content belongs in the Nook strip
+- `preferredWidth` should control module width directly
+
+Choose `placement: .menuApp` when:
+
+- you want a dedicated header tab
+- your UI needs the expanded app canvas
+- you are building a richer "mini app" instead of a single module tile
+
+## UI expectations
+
+Itchy renders the module or app label from `metadata.displayName`.
+
+Your SwiftUI view should usually:
+
+- render only its content
+- keep its background transparent unless the design needs a custom card
+- avoid drawing its own outer notch container
+- size naturally within the width requested by `preferredWidth`
+
+For Nook apps (`.menuApp`), `iconSystemName` is used for the header tab button.
+
+## Examples
+
+Reference examples live in `Templates/`:
+
+- `ClockModule`
+- `CounterModule`
+- `DateModule`
+- `MiniShelfModule`
+- `QuickActionsModule`
+
+Example intent:
+
+- `ClockModule`, `CounterModule`, `DateModule`
+  Good starting points for compact Nook modules.
+- `MiniShelfModule`, `QuickActionsModule`
+  Good starting points for Nook apps using `placement: .menuApp`.
+
+`Templates/...` folders are source examples only.
+
+Important:
+
+- they are not intended to be used as rigid copy-paste templates
+- they are not directly importable by Itchy
+- they are reference implementations showing plugin structure, metadata, placement, and SwiftUI composition
+
+Itchy loads only the compiled `.bundle` output.
 
 ## Output
 
@@ -67,7 +145,7 @@ MyModule.bundle/
       MyModule
 ```
 
-If Finder is hiding package contents, that is normal. Itchy expects the compiled `.bundle`, not the template source folder.
+Itchy expects the compiled `.bundle`, not the template source folder.
 
 ## Build from Terminal
 
@@ -99,13 +177,9 @@ Then validate it:
 swift run itchy-module-validator BuiltBundles/DateModule.bundle
 ```
 
-The resulting bundle will be here:
+You can import the resulting bundle directly into Itchy.
 
-- `ItchySDK/BuiltBundles/DateModule.bundle`
-
-You can import that bundle directly into Itchy.
-
-## Validate a module bundle
+## Validate a bundle
 
 The SDK ships with a validator CLI:
 
@@ -123,17 +197,15 @@ This checks:
 - identifier and display name are valid
 - preferred width is sane
 
-## Templates
+## Recommended workflow
 
-Starter module templates live in `Templates/`:
-
-- `ClockModule`
-- `CounterModule`
-- `DateModule`
-- `MiniShelfModule`
-- `QuickActionsModule`
-
-Each template is a standalone example bundle entry point plus SwiftUI view.
+1. Inspect the closest example.
+2. Decide whether you are building a Nook module or a Nook app.
+3. Set `placement` correctly.
+4. Keep the principal class tiny and move UI into SwiftUI views.
+5. Build the `.bundle`.
+6. Validate it with `itchy-module-validator`.
+7. Import it into Itchy.
 
 ## Local development
 
