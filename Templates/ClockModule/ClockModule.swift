@@ -9,7 +9,9 @@ final class ClockModulePlugin: NSObject, ItchyModulePlugin {
             identifier: "com.example.clock",
             displayName: "Clock",
             summary: "A simple custom clock module",
-            preferredWidth: 220
+            preferredWidth: 220,
+            placement: .nookModule,
+            iconSystemName: "clock"
         )
     }
 

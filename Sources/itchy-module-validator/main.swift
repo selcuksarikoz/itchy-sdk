@@ -1,6 +1,26 @@
 import AppKit
 import Foundation
 
+private extension NSObject {
+    func itchyString(for selectorName: String) -> String? {
+        let selector = NSSelectorFromString(selectorName)
+        guard responds(to: selector),
+              let value = perform(selector)?.takeUnretainedValue() as? String else {
+            return nil
+        }
+        return value.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    func itchyNumber(for selectorName: String) -> NSNumber? {
+        let selector = NSSelectorFromString(selectorName)
+        guard responds(to: selector),
+              let value = perform(selector)?.takeUnretainedValue() as? NSNumber else {
+            return nil
+        }
+        return value
+    }
+}
+
 enum ValidationError: LocalizedError {
     case missingBundle(String)
     case invalidBundle(String)
@@ -12,6 +32,8 @@ enum ValidationError: LocalizedError {
     case invalidIdentifier
     case invalidDisplayName
     case invalidPreferredWidth
+    case invalidPlacement
+    case invalidIconSystemName
 
     var errorDescription: String? {
         switch self {
@@ -35,6 +57,10 @@ enum ValidationError: LocalizedError {
             "metadata.displayName is missing or invalid."
         case .invalidPreferredWidth:
             "metadata.preferredWidth must be >= 160."
+        case .invalidPlacement:
+            "metadata.placement must be either nook or menu."
+        case .invalidIconSystemName:
+            "metadata.iconSystemName is missing or invalid."
         }
     }
 }
@@ -44,6 +70,8 @@ struct ValidationReport {
     let displayName: String
     let summary: String
     let preferredWidth: Double
+    let placement: String
+    let iconSystemName: String
     let principalClassName: String
 }
 
@@ -58,6 +86,8 @@ struct ItchyModuleValidatorCLI {
             print("Display Name: \(report.displayName)")
             print("Summary: \(report.summary.isEmpty ? "-" : report.summary)")
             print("Preferred Width: \(Int(report.preferredWidth))")
+            print("Placement: \(report.placement)")
+            print("Icon: \(report.iconSystemName)")
             print("Principal Class: \(report.principalClassName)")
             Foundation.exit(EXIT_SUCCESS)
         } catch {
@@ -110,16 +140,17 @@ struct ItchyModuleValidatorCLI {
             throw ValidationError.factoryReturnedInvalidType
         }
 
-        let identifier = (metadata.value(forKey: "identifier") as? String ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        let displayName = (metadata.value(forKey: "displayName") as? String ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        let summary = (metadata.value(forKey: "summary") as? String ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        let preferredWidth = (metadata.value(forKey: "preferredWidth") as? NSNumber)?.doubleValue ?? 0
+        let identifier = metadata.itchyString(for: "identifier") ?? ""
+        let displayName = metadata.itchyString(for: "displayName") ?? ""
+        let summary = metadata.itchyString(for: "summary") ?? ""
+        let preferredWidth = metadata.itchyNumber(for: "preferredWidth")?.doubleValue ?? 0
+        let placement = metadata.itchyString(for: "placementRawValue") ?? ""
+        let iconSystemName = metadata.itchyString(for: "iconSystemName") ?? ""
 
         guard !identifier.isEmpty else { throw ValidationError.invalidIdentifier }
         guard !displayName.isEmpty else { throw ValidationError.invalidDisplayName }
+        guard placement == "nook" || placement == "menu" else { throw ValidationError.invalidPlacement }
+        guard !iconSystemName.isEmpty else { throw ValidationError.invalidIconSystemName }
         guard preferredWidth >= 160 else { throw ValidationError.invalidPreferredWidth }
 
         return ValidationReport(
@@ -127,6 +158,8 @@ struct ItchyModuleValidatorCLI {
             displayName: displayName,
             summary: summary,
             preferredWidth: preferredWidth,
+            placement: placement,
+            iconSystemName: iconSystemName,
             principalClassName: NSStringFromClass(principalClass)
         )
     }

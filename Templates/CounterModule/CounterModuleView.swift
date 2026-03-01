@@ -5,10 +5,6 @@ struct CounterModuleView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Counter")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.9))
-
             Text("\(count)")
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
@@ -25,18 +21,7 @@ struct CounterModuleView: View {
                 .buttonStyle(CounterButtonStyle())
             }
         }
-        .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color(red: 0.12, green: 0.12, blue: 0.14),
-                    Color(red: 0.05, green: 0.05, blue: 0.06)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
     }
 }
 

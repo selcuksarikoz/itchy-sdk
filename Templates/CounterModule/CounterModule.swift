@@ -9,7 +9,9 @@ final class CounterModulePlugin: NSObject, ItchyModulePlugin {
             identifier: "com.example.counter",
             displayName: "Counter",
             summary: "An interactive counter module",
-            preferredWidth: 220
+            preferredWidth: 220,
+            placement: .nookModule,
+            iconSystemName: "plusminus.circle"
         )
     }
 

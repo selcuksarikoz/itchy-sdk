@@ -9,7 +9,9 @@ final class DateModulePlugin: NSObject, ItchyModulePlugin {
             identifier: "com.example.date",
             displayName: "Date",
             summary: "Shows today's date in the Nook",
-            preferredWidth: 240
+            preferredWidth: 240,
+            placement: .nookModule,
+            iconSystemName: "calendar"
         )
     }
 

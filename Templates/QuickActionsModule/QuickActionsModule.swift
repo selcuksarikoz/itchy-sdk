@@ -9,7 +9,9 @@ final class QuickActionsModulePlugin: NSObject, ItchyModulePlugin {
             identifier: "com.example.quickactions",
             displayName: "Quick Actions",
             summary: "Three tappable shortcuts inside the Nook",
-            preferredWidth: 260
+            preferredWidth: 260,
+            placement: .menuApp,
+            iconSystemName: "bolt.circle"
         )
     }
 
