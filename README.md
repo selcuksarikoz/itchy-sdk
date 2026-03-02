@@ -50,6 +50,10 @@ public enum ItchyPluginPlacement: String {
     case menuApp = "menu"
 }
 
+public struct ItchyConstants {
+    public static let moduleHeight: CGFloat = 120.0
+}
+
 public final class ItchyModuleMetadata: NSObject {
     public init(
         identifier: String,
@@ -83,14 +87,14 @@ Choose `placement: .menuApp` when:
 
 ## UI expectations
 
-Itchy renders the module or app label from `metadata.displayName`.
+Itchy automatically renders the module title from `metadata.displayName`. Do not include a title in your SwiftUI view.
 
-Your SwiftUI view should usually:
+Your SwiftUI view should:
 
-- render only its content
-- keep its background transparent unless the design needs a custom card
-- avoid drawing its own outer notch container
-- size naturally within the width requested by `preferredWidth`
+- render only its content (no title)
+- keep its background transparent
+- use `ScrollView` if content may overflow
+- access `ItchyConstants.moduleHeight` for the standard module height (120pt)
 
 For Nook apps (`.menuApp`), `iconSystemName` is used for the header tab button.
 

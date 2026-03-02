@@ -1,8 +1,19 @@
 import AppKit
+import SwiftUI
 
 public enum ItchyPluginPlacement: String {
     case nookModule = "nook"
     case menuApp = "menu"
+}
+
+public struct ItchyConstants {
+    public static let moduleHeight: CGFloat = 120.0
+}
+
+extension View {
+    public func nookModuleLayout() -> some View {
+        self.frame(maxHeight: .infinity, alignment: .topLeading)
+    }
 }
 
 @objc(ItchyModuleMetadata)

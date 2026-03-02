@@ -1,4 +1,5 @@
 import SwiftUI
+import itchy
 
 struct MiniShelfModuleView: View {
     private let items: [(String, String)] = [
@@ -19,17 +20,18 @@ struct MiniShelfModuleView: View {
                             .overlay {
                                 Image(systemName: item.0)
                                     .font(.system(size: 22, weight: .medium))
-                                    .foregroundStyle(.white.opacity(0.7))
+                                    .foregroundColor(.white.opacity(0.7))
                             }
 
                         Text(item.1)
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.72))
+                            .foregroundColor(.white.opacity(0.72))
                     }
                 }
+                Spacer(minLength: 0)
             }
             .padding(.vertical, 4)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .nookModuleLayout()
     }
 }
