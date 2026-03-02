@@ -69,6 +69,10 @@ public protocol ItchyModulePlugin: AnyObject {
     var metadata: ItchyModuleMetadata { get }
     func makeViewController() -> NSViewController
 }
+
+extension View {
+    public func nookModuleLayout() -> some View
+}
 ```
 
 ## Placement guide
@@ -92,6 +96,8 @@ Itchy automatically renders the module title from `metadata.displayName`. Do not
 Your SwiftUI view should:
 
 - render only its content (no title)
+- use `.nookModuleLayout()` on its root container for consistent alignment
+- use `Spacer(minLength: 0)` inside its `VStack` to ensure top alignment even if the content is short
 - keep its background transparent
 - use `ScrollView` if content may overflow
 - access `ItchyConstants.moduleHeight` for the standard module height (120pt)
