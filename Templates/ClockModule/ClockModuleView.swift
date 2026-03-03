@@ -1,6 +1,8 @@
 import SwiftUI
 import itchy
 
+/// The primary view displayed in the Nook area for the Clock module.
+/// This view showcases multiple time zones in a vertical scrollable list.
 struct ClockModuleView: View {
     private let timeZones = [
         ("Local", TimeZone.current),
@@ -21,19 +23,24 @@ struct ClockModuleView: View {
                 ForEach(timeZones, id: \.0) { zone in
                     TimeZoneRow(name: zone.0, timeZone: zone.1)
                 }
+                
+                /// Standard alignment helper: ensures top alignment even with short content.
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        /// Mandatory extension to ensure the view aligns correctly within the Nook strip.
         .nookModuleLayout()
     }
 }
 
+/// A single row representing a specific time zone.
 private struct TimeZoneRow: View {
     let name: String
     let timeZone: TimeZone
 
     var body: some View {
+        /// TimelineView ensures the time updates every second automatically.
         TimelineView(.periodic(from: .now, by: 1)) { context in
             HStack {
                 Text(name)

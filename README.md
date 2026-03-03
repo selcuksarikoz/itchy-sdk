@@ -35,25 +35,25 @@ import itchy
 
 ## Minimal plugin contract
 
-Create a macOS `.bundle` target whose principal class conforms to `ItchyModulePlugin`.
+Create a macOS `.bundle` target whose principal class conforms to `ItchyModulePlugin`. Itchy uses **NSViewController hosting** to display your SwiftUI views.
 
-Your principal class must expose:
-
-- `metadata`
-- `makeViewController()`
+Your principal class must inherit from `NSObject` and be marked as the `NSPrincipalClass` in your `Info.plist`.
 
 The public SDK surface is:
 
 ```swift
+// Constants
+public struct ItchyConstants {
+    public static let moduleHeight: CGFloat = 120.0
+}
+
+// Placements
 public enum ItchyPluginPlacement: String {
     case nookModule = "nook"
     case menuApp = "menu"
 }
 
-public struct ItchyConstants {
-    public static let moduleHeight: CGFloat = 120.0
-}
-
+// Metadata
 public final class ItchyModuleMetadata: NSObject {
     public init(
         identifier: String,
@@ -61,16 +61,100 @@ public final class ItchyModuleMetadata: NSObject {
         summary: String = "",
         preferredWidth: NSNumber = 240,
         placement: ItchyPluginPlacement,
-        iconSystemName: String = "square.grid.2x2"
+        iconSystemName: String = "square.grid.2x2",
+        supportsLiveActivity: Bool = false
     )
 }
 
+// Plugin Protocol
 public protocol ItchyModulePlugin: AnyObject {
     var metadata: ItchyModuleMetadata { get }
     func makeViewController() -> NSViewController
+    
+    // Live Activity Support (Optional)
+    @objc optional func makeLiveActivityViewController() -> NSViewController
+    @objc optional var isLiveActivityActive: Bool { get }
 }
 
-extension View {
+// Trigger Helper
+public final class ItchyLiveActivityTrigger: NSObject {
+    @objc public static func trigger(
+        identifier: String, 
+        title: String?, 
+        message: String?, 
+        trailingMessage: String?,
+        systemIcon: String?, 
+        duration: TimeInterval
+    )
+}
+```
+
+## Live Activities
+
+Live Activities are compact views shown in the Notch when it is collapsed. They support two modes of operation:
+
+### 1. Persistent (State-based) Mode
+The view is shown based on your module's internal logic.
+
+```swift
+@objc(MyModule)
+final class MyModule: NSObject, ItchyModulePlugin {
+    // ... metadata ...
+
+    // 1. Enable support
+    // metadata.supportsLiveActivity = true
+
+    // 2. Return your compact view
+    @objc func makeLiveActivityViewController() -> NSViewController {
+        NSHostingController(rootView: MyCompactView())
+    }
+
+    // 3. Control visibility (polled every second)
+    @objc var isLiveActivityActive: Bool {
+        return someInternalState == .active
+    }
+}
+```
+
+### 2. Triggered (Notification) Mode
+Instantly show a high-priority notification. This overrides built-in activities (Music, Timer) for the specified duration.
+
+```swift
+// Option A: Using the protocol extension (easiest)
+self.triggerLiveActivity(
+    title: "Download",
+    message: "File.zip",
+    trailingMessage: "85%", // Appears on the far right
+    systemIcon: "arrow.down.circle.fill",
+    duration: 3.0
+)
+
+// Option B: Using the global trigger class
+ItchyLiveActivityTrigger.trigger(
+    identifier: "com.user.mod",
+    title: "Alert",
+    message: "Something happened",
+    trailingMessage: "ERR",
+    systemIcon: "exclamationmark.triangle",
+    duration: 5.0
+)
+```
+
+### Priority & Visibility Logic
+Itchy manages visibility based on the following priority:
+1. **Triggered Activities:** Temporary overrides from any module (highest).
+2. **Built-in Activities:** Active Mail, Focus Timers, or Media Playback.
+3. **Persistent Custom Activities:** Modules with `isLiveActivityActive: true`.
+
+If multiple activities exist in the same tier, Itchy rotates them every 8 seconds.
+
+### Design Guidelines
+- **Height:** The live activity container is ~30-32pt high (Capsule shape).
+- **Trailing Message:** Use `trailingMessage` for status, percentages, or short values (e.g., "12:45", "99%", "ON"). It is rendered with a bold monospaced font on the right.
+- **Icons:** Use SF Symbols for `systemIcon`.
+
+## Placement guide
+
     public func nookModuleLayout() -> some View
 }
 ```

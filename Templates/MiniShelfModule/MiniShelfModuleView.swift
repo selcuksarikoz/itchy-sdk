@@ -1,37 +1,53 @@
 import SwiftUI
 import itchy
 
+/// A full-width view for a standalone menu application.
+/// Shows how to create a scrollable grid of cards within the Notch.
 struct MiniShelfModuleView: View {
-    private let items: [(String, String)] = [
-        ("doc.text", "Spec"),
-        ("photo", "Mock"),
-        ("waveform", "Audio"),
-        ("film", "Clip")
+    private let items = [
+        ("Project Alpha", "circle.fill", Color.blue),
+        ("Beta Review", "square.fill", Color.green),
+        ("Gamma Release", "triangle.fill", Color.orange),
+        ("Delta Sprint", "diamond.fill", Color.purple),
+        ("Epsilon Testing", "star.fill", Color.yellow),
+        ("Zeta Deployment", "pentagon.fill", Color.red)
     ]
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                ForEach(items, id: \.1) { item in
-                    VStack(spacing: 8) {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color.white.opacity(0.1))
-                            .frame(width: 72, height: 72)
-                            .overlay {
-                                Image(systemName: item.0)
-                                    .font(.system(size: 22, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.7))
-                            }
-
-                        Text(item.1)
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.white.opacity(0.72))
-                    }
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                ForEach(items, id: \.0) { item in
+                    ShelfCard(title: item.0, icon: item.1, color: item.2)
                 }
-                Spacer(minLength: 0)
+                
+                /// Standard alignment helper: ensures content doesn't get cut off at the bottom.
+                Spacer(minLength: 20)
             }
-            .padding(.vertical, 4)
+            .padding(.top, 4)
         }
-        .nookModuleLayout()
+    }
+}
+
+/// A simple card representation within the Mini Shelf.
+private struct ShelfCard: View {
+    let title: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(color)
+
+            Text(title)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.white)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(Color.white.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
