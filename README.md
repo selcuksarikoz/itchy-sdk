@@ -71,10 +71,17 @@ public protocol ItchyModulePlugin: AnyObject {
     var metadata: ItchyModuleMetadata { get }
     func makeViewController() -> NSViewController
     
+    // Lifecycle
+    @objc optional func pluginDidLoad()
+    
     // Live Activity Support (Optional)
     @objc optional func makeLiveActivityViewController() -> NSViewController
     @objc optional var isLiveActivityActive: Bool { get }
 }
+...
+### Lifecycle
+- `init()`: Standard initialization. Avoid firing one-time triggers here.
+- `pluginDidLoad()`: Called when Itchy has fully loaded your bundle and is ready to handle events. Recommended for starting timers or sending initial notifications.
 
 // Trigger Helper
 public final class ItchyLiveActivityTrigger: NSObject {
@@ -88,6 +95,38 @@ public final class ItchyLiveActivityTrigger: NSObject {
     )
 }
 ```
+
+## API Reference
+
+### Module Metadata (`ItchyModuleMetadata`)
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `identifier` | `String` | Unique reverse-DNS ID (e.g., `com.user.mod`). |
+| `displayName` | `String` | Human-readable name shown in settings/headers. |
+| `summary` | `String` | Short description of the module. |
+| `preferredWidth`| `NSNumber` | Initial width in the Nook (min 160pt). |
+| `placement` | `Enum` | `.nookModule` (strip) or `.menuApp` (standalone). |
+| `iconSystemName`| `String` | SF Symbol name for the icon. |
+| `supportsLiveActivity` | `Bool` | Enable support for collapsed Notch views. |
+
+### Plugin Protocol (`ItchyModulePlugin`)
+| Method / Property | Requirement | Description |
+| :--- | :--- | :--- |
+| `metadata` | **Required** | Your module's configuration. |
+| `makeViewController()` | **Required** | Returns the main SwiftUI-hosted view controller. |
+| `pluginDidLoad()` | Optional | Called when Itchy is ready. Best for starting timers. |
+| `makeLiveActivityViewController()` | Optional | Returns the compact view for the collapsed Notch. |
+| `isLiveActivityActive` | Optional | Polled by Itchy to control persistent visibility. |
+
+### Live Activity Trigger (`ItchyLiveActivityTrigger`)
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `identifier` | `String` | The identifier of your module. |
+| `title` | `String?` | Bold title shown on the left. |
+| `message` | `String?` | Small descriptive text below the title. |
+| `trailingMessage`| `String?` | **Bold monospaced** text on the far right. |
+| `systemIcon` | `String?` | SF Symbol name for the icon. |
+| `duration` | `TimeInterval`| How long to stay visible (highest priority). |
 
 ## Live Activities
 

@@ -110,6 +110,10 @@ public protocol ItchyModulePlugin: AnyObject {
     /// Returns the main view controller for the module.
     /// Itchy hosts this view inside the Nook or as a standalone app.
     func makeViewController() -> NSViewController
+
+    /// Called by Itchy once the plugin is fully loaded and the app is ready to receive events.
+    /// Use this instead of init() for one-time triggers or starting services.
+    @objc optional func pluginDidLoad()
     
     /// Returns the view controller for the collapsed Notch (Live Activity).
     /// Only used if `metadata.supportsLiveActivity` is true.
