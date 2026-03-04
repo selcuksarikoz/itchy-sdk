@@ -19,20 +19,6 @@ If you say "Nook app" in docs or product copy, that maps to `placement: .menuApp
 
 Both plugin types are delivered as compiled macOS `.bundle` files.
 
-## Install
-
-Add the package from Xcode:
-
-```text
-https://github.com/selcuksarikoz/itchy-sdk
-```
-
-Then import:
-
-```swift
-import itchy
-```
-
 ## Minimal plugin contract
 
 Create a macOS `.bundle` target whose principal class conforms to `ItchyModulePlugin`. Itchy uses **NSViewController hosting** to display your SwiftUI views.
@@ -194,12 +180,6 @@ If multiple activities exist in the same tier, Itchy rotates them every 8 second
 
 ## Placement guide
 
-    public func nookModuleLayout() -> some View
-}
-```
-
-## Placement guide
-
 Choose `placement: .nookModule` when:
 
 - your UI is compact
@@ -357,4 +337,8 @@ You can add this package locally in Xcode by selecting the `ItchySDK` folder.
 
 ## Distribution
 
-When publishing, expose `ItchySDK` as a Swift package in your public repository so developers can add it directly from Xcode.
+Distribute your compiled `.bundle` files for free. Users download and import them directly:
+
+- `Itchy > Settings > Modules > Custom Modules > Import Module`
+
+A dedicated store is coming soon to [kuulto.app](https://kuulto.app).
