@@ -106,7 +106,7 @@ public final class ItchyLiveActivityTrigger: NSObject {
 | `summary` | `String` | Short description of the module. |
 | `preferredWidth`| `NSNumber` | Initial width in the Nook (min 160pt). |
 | `placement` | `Enum` | `.nookModule` (strip) or `.menuApp` (standalone). |
-| `iconSystemName`| `String` | SF Symbol name for the icon. |
+| `iconSystemName`| `String` | Header icon hint. SF Symbol is used if provided; otherwise Itchy falls back to the bundle icon when available. |
 | `supportsLiveActivity` | `Bool` | Enable support for collapsed Notch views. |
 
 ### Plugin Protocol (`ItchyModulePlugin`)
@@ -214,7 +214,7 @@ Choose `placement: .menuApp` when:
 
 ## UI expectations
 
-Itchy automatically renders the module title from `metadata.displayName`. Do not include a title in your SwiftUI view.
+Itchy automatically renders the module title from `metadata.displayName` where appropriate. Do not include a duplicate title in your SwiftUI view.
 
 Your SwiftUI view should:
 
@@ -225,7 +225,13 @@ Your SwiftUI view should:
 - use `ScrollView` if content may overflow
 - access `ItchyConstants.moduleHeight` for the standard module height (120pt)
 
-For Nook apps (`.menuApp`), `iconSystemName` is used for the header tab button.
+For Nook apps (`.menuApp`):
+
+- Itchy renders the header tab for you
+- your SwiftUI view should render only app content, not a duplicated title/header
+- the header tab icon uses the bundle icon when available, with `iconSystemName` as fallback
+- you can ship a custom PNG bundle icon via `CFBundleIconFile`; `RickAndMortyModule` demonstrates this with `Resources/RickAndMortyIcon.png`
+- the app canvas can use the full available width; set `preferredWidth` accordingly if you want a full-width app
 
 ## Examples
 
@@ -244,7 +250,7 @@ Example intent:
 - `MiniShelfModule`, `QuickActionsModule`
   Good starting points for Nook apps using `placement: .menuApp`.
 
-`Templates/...` folders are source examples only.
+`Templates/...` folders are source examples only. The compiled outputs live in `BuiltBundles/...`.
 
 Important:
 
@@ -276,6 +282,8 @@ MyModule.bundle/
     Info.plist
     MacOS/
       MyModule
+    Resources/
+      MyModuleIcon.png
 ```
 
 Itchy expects the compiled `.bundle`, not the template source folder.
@@ -294,6 +302,9 @@ mkdir -p BuiltBundles/DateModule.bundle/Contents/MacOS \
 
 cp Templates/DateModule/Info.plist \
   BuiltBundles/DateModule.bundle/Contents/Info.plist
+
+cp -R Templates/DateModule/Resources/. \
+  BuiltBundles/DateModule.bundle/Contents/Resources/
 
 swiftc -parse-as-library -emit-library -Xlinker -bundle \
   -module-name DateModule \
