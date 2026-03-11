@@ -220,12 +220,13 @@ Reference examples live in `Templates/`:
 - `ClockModule`
 - `CounterModule`
 - `DateModule`
+- `IPTVModule`
 - `MiniShelfModule`
 - `QuickActionsModule`
 
 Example intent:
 
-- `ClockModule`, `CounterModule`, `DateModule`
+- `ClockModule`, `CounterModule`, `DateModule`, `IPTVModule`
   Good starting points for compact Nook modules.
 - `MiniShelfModule`, `QuickActionsModule`
   Good starting points for Nook apps using `placement: .menuApp`.
